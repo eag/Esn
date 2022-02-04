@@ -1,0 +1,78 @@
+#!/bin/bash
+# 
+#Copyright (C) 2022 Erin Gibson
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#_______________________________________________________________________________
+#
+# SETUP
+#_______________________________________________________________________________
+
+data_dir="/Users/erin/erindocs/projects/eeg/data/stim_locked_esn/s203"
+train_fn=${data_dir}/eeg_train.bin
+test_fn=${data_dir}/eeg_test.bin
+validation_fn=${data_dir}/eeg_validation.bin
+out_dir=${data_dir}
+
+washout=500
+num_prediction_steps=8
+connection_sparsity=0.2
+network_size=400
+num_random_initializations=1
+
+#_______________________________________________________________________________
+#
+# RUN
+#_______________________________________________________________________________
+
+# Find optimal parameters with validation data
+if [[ ! -f ${out_dir}/esn_parameters.txt ]]; then
+   /Users/erin/erindocs/projects/bin/EsnMain \
+      -l 0.8 -l 0.85 -l 0.9 -l 0.95  \
+      -s 0.8 -s 0.85 -s 0.9 -s 0.95  \
+      -i 0.15 -i 0.2 -i 0.25 \
+      -r 1e-5 -r 1e-10 \
+      -w ${washout} \
+      -k ${num_prediction_steps} \
+      -c ${connection_sparsity} \
+      -n ${network_size} \
+      -x ${num_random_initializations} \
+      -t ${train_fn} \
+      -v ${validation_fn} \
+      -d ${out_dir}
+fi
+
+# Predict using optimal parameters
+leaking_rate=$(cat ${out_dir}/esn_parameters.txt | cut -d',' -f1)
+spectral_radius=$(cat ${out_dir}/esn_parameters.txt | cut -d',' -f2)
+input_scaling=$(cat ${out_dir}/esn_parameters.txt | cut -d',' -f3)
+regularization=$(cat ${out_dir}/esn_parameters.txt | cut -d',' -f4)
+
+# Predict test data
+/Users/erin/erindocs/projects/bin/EsnMain \
+   -l ${leaking_rate} \
+   -s ${spectral_radius} \
+   -i ${input_scaling} \
+   -r ${regularization} \
+   -w ${washout} \
+   -k ${num_prediction_steps} \
+   -c ${connection_sparsity} \
+   -n $((${network_size}*2)) \
+   -x ${num_random_initializations} \
+   -t ${train_fn} \
+   -p ${test_fn} \
+   -d ${out_dir}
+
+#_______________________________________________________________________________
