@@ -12,9 +12,14 @@ to predict epoched EEG data some "k" steps ahead
 ### Input
 - input should be stored as 64 bit floats in a binary file
 - first value in the binary file stores the number of timepoints in the epoch
-- second value in the binary file stores the number of epochs in the file
+- second value stores the number of epochs in the file
 - remaining values store the epoched data for a single channel or multiple channels
 - values are generally normalized to lie between 0 and 1
+
+### Output
+- first value in the binary file stores the number of timepoints in the epoch
+- second stores the number of epochs in the file
+- third value stores the number of prediction steps
 
 ### Execution
 - see https://github.com/eag/esn/blob/main/bash/run_esn for an example
