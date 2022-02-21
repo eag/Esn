@@ -20,6 +20,7 @@ to predict epoched EEG data some "k" steps ahead
 - first value in the binary file stores the number of timepoints in the epoch
 - second stores the number of epochs in the file
 - third value stores the number of prediction steps
+- remaining values store the prediction k steps ahead
 
 ### Execution
 - see https://github.com/eag/esn/blob/main/bash/run_esn for an example

@@ -190,7 +190,9 @@ void Esn::LoadAllData()
 {
     std::cout << "Loading data..." << std::flush;
  
-    for ( int f = 0; f<3; ++f ) {
+    //TODO: fix: explicitly set trialLength using training data
+    //           and this also assumes that validation/training data are the same length
+    for ( int f = 2; f>=0; --f ) {
         if ( f == 0 ) { 
             int dataTrainSize = LoadData( opts.trainFilename, dataTrain );    
             if ( dataTrainSize > 0 ) {      
@@ -382,7 +384,7 @@ void Esn::WriteParameters()
     os << GetBestLeakingRate() << ", ";
     os << GetBestSpectralRadius() << ", ";
     os << GetBestInputScaling() << ", ";
-    os << GetBestRegularization() << ", ";
+    os << GetBestRegularization();
     os.close();
 }
 //_____________________________________________________________________________________________________________________
